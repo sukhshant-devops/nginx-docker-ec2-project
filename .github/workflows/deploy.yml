@@ -1,4 +1,4 @@
-name: Deploy Nginx App to EC2
+name: Deploy Nginx App
 
 on:
   push:
@@ -10,22 +10,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to EC2 via SSH
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
-          host: "54.92.199.109"
+          host: 54.92.199.109
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
 
-            cd nginx-docker-ec2-project || git clone https://github.com/sukhshant-devops/nginx-docker-ec2-project.git
-            cd nginx-docker-ec2-project
+            cd /home/ubuntu
 
+            if [ ! -d "nginx-docker-ec2-project" ]; then
+              git clone https://github.com/sukhshant-devops/nginx-docker-ec2-project.git
+            fi
+
+            cd nginx-docker-ec2-project
             git pull origin main
 
             docker rm -f nginx-container || true
 
             docker build -t nginx-app .
 
-            docker run -d --name nginx-container -p 80:80 --restart always nginx-app
+            docker run -d -p 80:80 --name nginx-container --restart always nginx-app
