@@ -19,22 +19,13 @@ jobs:
           script: |
             set -e
 
-            echo "Connecting to EC2..."
-
-            if [ ! -d "nginx-docker-ec2-project" ]; then
-              git clone https://github.com/sukhshant-devops/nginx-docker-ec2-project.git
-            fi
-
+            cd nginx-docker-ec2-project || git clone https://github.com/sukhshant-devops/nginx-docker-ec2-project.git
             cd nginx-docker-ec2-project
+
             git pull origin main
 
-            echo "Stopping old container..."
             docker rm -f nginx-container || true
 
-            echo "Building image..."
             docker build -t nginx-app .
 
-            echo "Running container..."
             docker run -d --name nginx-container -p 80:80 --restart always nginx-app
-
-            echo "Deployment successful!"
