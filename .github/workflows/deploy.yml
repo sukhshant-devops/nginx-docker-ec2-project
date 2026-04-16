@@ -1,4 +1,4 @@
-name: Deploy to EC2
+name: Deploy Nginx App to EC2
 
 on:
   push:
@@ -10,15 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to EC2
+      - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
+          host: "54.92.199.109"   # temporary direct test
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd node-docker-app
+            if [ ! -d "nginx-docker-ec2-project" ]; then
+              git clone https://github.com/sukhshant-devops/nginx-docker-ec2-project.git
+            fi
+            cd nginx-docker-ec2-project
             git pull
-            docker build -t node-app .
-            docker rm -f node-container || true
-            docker run -d -p 3000:3000 --name node-container node-app
+            docker-compose down
+            docker-compose up -d
